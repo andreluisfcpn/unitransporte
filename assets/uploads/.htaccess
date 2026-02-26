@@ -1,0 +1,37 @@
+# Bloquear execução de scripts no diretório de uploads
+# Esta é uma camada adicional de segurança caso as regras do .htaccess principal falhem
+
+# Desativar completamente a engine PHP
+php_flag engine off
+
+# Negar acesso a todos os scripts
+<FilesMatch "\.ph(p[3-5]?|tml)$">
+  Deny from all
+</FilesMatch>
+
+<FilesMatch "\.(cgi|pl|py|jsp|asp|aspx|sh|bash|htaccess)$">
+  Deny from all
+</FilesMatch>
+
+# Forçar download de scripts se encontrados
+<FilesMatch "\.ph(p[3-5]?|tml|p|ar)$">
+  ForceType application/octet-stream
+  Header set Content-Disposition "attachment"
+</FilesMatch>
+
+# Apenas permitir acesso a arquivos de imagem
+<FilesMatch "^(?!.*\.(jpg|jpeg|png|gif)$).*$">
+  Order deny,allow
+  Deny from all
+</FilesMatch>
+
+# Desativar execução de CGI e listagem de diretórios
+Options -ExecCGI -Indexes
+
+# Definir mime types para imagens
+AddType image/jpeg jpg jpeg
+AddType image/png png
+AddType image/gif gif
+
+# Tratar qualquer tentativa de executar PHP como texto simples
+AddHandler text/plain .php .php3 .php4 .php5 .phtml .phar 

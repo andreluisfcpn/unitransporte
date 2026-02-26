@@ -1,0 +1,84 @@
+# Arquivo .htaccess para sistema PHP de transporte/unitrans
+# Configurações básicas de segurança e otimização
+
+# Habilitar o motor de reescrita
+RewriteEngine On
+
+# Definir a página inicial
+DirectoryIndex index.php
+
+# Proteger o arquivo .htaccess
+<Files .htaccess>
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Proteger arquivos sensíveis
+<FilesMatch "(^\.|\.(bak|config|sql|fla|psd|ini|log|sh|inc|sw[op]|dist)|~)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Prevenir navegação de diretórios
+Options -Indexes
+
+# Prevenir acesso a arquivos de configuração e importantes
+<FilesMatch "^(config\.php|README\.md|composer\.(json|lock))$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Impedir acesso à pasta includes
+RewriteRule ^includes/ - [F,L]
+
+# Habilitar compressão GZIP
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/x-javascript application/json
+</IfModule>
+
+# Configurar cabeçalhos de segurança
+<IfModule mod_headers.c>
+    # Prevenir clickjacking
+    Header always set X-Frame-Options "SAMEORIGIN"
+    # Proteção XSS
+    Header always set X-XSS-Protection "1; mode=block"
+    # Prevenir tipos MIME sniffing
+    Header always set X-Content-Type-Options "nosniff"
+    # Segurança de transporte estrita (HSTS)
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>
+
+# Redirecionar HTTP para HTTPS (descomente para ativar)
+ RewriteCond %{HTTPS} off
+ RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Definir o charset padrão
+AddDefaultCharset UTF-8
+
+# Configurar cache para arquivos estáticos
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+</IfModule>
+
+# Tratamento de erros
+ErrorDocument 404 /index.php
+ErrorDocument 403 /index.php
+
+# Limitar métodos HTTP
+<LimitExcept GET POST>
+    Deny from all
+</LimitExcept>
+
+# Prevenir hotlinking de imagens (opcional, descomente para ativar)
+# RewriteCond %{HTTP_REFERER} !^$
+# RewriteCond %{HTTP_REFERER} !^http(s)?://(www\.)?seudominio.com [NC]
+# RewriteRule \.(jpg|jpeg|png|gif)$ - [NC,F,L] 
